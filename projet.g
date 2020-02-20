@@ -84,7 +84,7 @@ ptvg  : ';'
   | 
   ;
   
-corps : 'debut' instructions 'fin'
+corps : 'debut' {PtGen.pt(401);} instructions 'fin'
   ;
   
 parfixe: 'fixe' '(' pf ( ';' pf)* ')'
@@ -125,10 +125,10 @@ inscond : 'cond'  expression  ':' instructions
 boucle  : 'ttq'  expression 'faire' instructions 'fait' 
   ;
   
-lecture: 'lire' '(' ident  ( ',' ident  )* ')' 
+lecture: 'lire' '(' ident {PtGen.pt(231);} ( ',' ident {PtGen.pt(231);}  )* ')' 
   ;
   
-ecriture: 'ecrire' '(' expression  ( ',' expression  )* ')'
+ecriture: 'ecrire' '(' expression {PtGen.pt(241);} ( ',' expression {PtGen.pt(241);} )* ')'
    ;
   
 affouappel
@@ -143,7 +143,7 @@ effixes : '(' (expression  (',' expression  )*)? ')'
 effmods :'(' (ident  (',' ident  )*)? ')'
   ; 
   
-expression: (exp1) ('ou'  exp1  )*
+expression: (exp1) ('ou'{PtGen.pt(281);}  exp1 {PtGen.pt(281);} {PtGen.pt(282);} )*
   ;
   
 exp1  : exp2 ('et'  exp2  )*
@@ -176,15 +176,15 @@ exp5  : primaire
   ;
   
 primaire: valeur 
-  | ident  
+  | ident  {PtGen.pt(342);}
   | '(' expression ')'
   ;
   
-valeur  : nbentier 
-  | '+' nbentier 
-  | '-' nbentier 
-  | 'vrai' 
-  | 'faux' 
+valeur  : nbentier {PtGen.pt(351);}
+  | '+' nbentier {PtGen.pt(351);}
+  | '-' nbentier {PtGen.pt(352);}
+  | 'vrai' {PtGen.pt(353);}
+  | 'faux' {PtGen.pt(354);}
   ;
 
 // partie lexicale  : cette partie ne doit pas etre modifiee  //

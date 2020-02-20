@@ -126,7 +126,7 @@ public class PtGen {
     // ------------------
     //
     private static EltTabSymb[] tabSymb = new EltTabSymb[MAXSYMB + 1];
-    
+   
     // it = indice de remplissage de tabSymb
     // bc = bloc courant (=1 si le bloc courant est le programme principal)
 	private static int it, bc;
@@ -233,12 +233,11 @@ public class PtGen {
 	 * @param numGen : numero du point de generation a executer
 	 */
 	public static void pt(int numGen) {
-	
+		System.out.println(numGen);
 		switch (numGen) {
 		case 0:
 			initialisations();
 			break;
-		
 		/*
 		 * 
 		 * 
@@ -283,15 +282,52 @@ public class PtGen {
 			break;
 
 		/*
-		 * 
+		 * Lecture/Ecriture
 		 */
-		case 231:
-			/*indexSymb = presentIdent(UtilLex.numIdCourant);
-			if( tabSymb.code[indexSymb] == BOOL) {
-			    produire();
-			}*/
+		case 231: //Lecture
+			indexSymb = presentIdent(UtilLex.numIdCourant);
+			if(indexSymb != 0) {
+				EltTabSymb row = tabSymb[indexSymb];
+				if(row.categorie == VARGLOBALE) {
+						
+					int type = row.type;
+					if(type == BOOL) {
+						po.produire(LIREBOOL);
+					    po.produire(AFFECTERG);
+					    po.produire(tabSymb[indexSymb].info);
+					} else {
+						po.produire(LIRENT);
+					    po.produire(AFFECTERG);
+					    po.produire(tabSymb[indexSymb].info);
+					}
+				} else {
+					System.out.println("Le type de "+ row.code + " ne permet pas l'écriture");
+				}
+			} else {
+				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
+			}
 			break;
-			
+
+		case 241: //Ecriture
+			indexSymb = presentIdent(UtilLex.numIdCourant);
+			if(indexSymb != 0) {
+				EltTabSymb row = tabSymb[indexSymb];
+					
+					int type = row.type;
+					if(type == BOOL) {
+						po.produire(CONTENUG);
+					    po.produire(row.info);
+					    po.produire(ECRBOOL);
+					} else {
+						po.produire(CONTENUG);
+					    po.produire(row.info);
+					    po.produire(ECRENT);
+					}
+				
+			} else {
+				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
+			}
+			break;
 		/*
 		 * 
 		 */
@@ -388,11 +424,11 @@ public class PtGen {
 			if (tabSymb[k].categorie == CONSTANTE ) {
 				po.produire( EMPILER );
 				po.produire( tabSymb[k].info );
-				tCour = ENT; 
+				tCour = tabSymb[k].type; 
 			} else if (tabSymb[k].categorie == VARGLOBALE) { 
 				po.produire ( CONTENUG );
 				po.produire( tabSymb[k].info  );
-				tCour = ENT; 
+				tCour = tabSymb[k].type; 
 			} else {
 			    UtilLex.messErr("Nul");
 			}
@@ -405,6 +441,18 @@ public class PtGen {
 			tCour = ENT;
 			vCour = UtilLex.valEnt;
 			break;
+		case 352:
+			tCour = ENT;
+			vCour = - UtilLex.valEnt;
+			break;
+		case 353:
+			tCour = BOOL;
+			vCour = VRAI;
+			break;
+		case 354:
+			tCour = BOOL;
+			vCour = FAUX;
+			break;
 		/*
 		 * 
 		 */
@@ -413,6 +461,9 @@ public class PtGen {
 			po.constObj();
 			po.constGen();
 			/* TODO : Verif pile vide */
+			break;
+		case 401:
+			afftabSymb();
 			break;
 		default:
 			System.out.println("Point de generation non prevu dans votre liste");
