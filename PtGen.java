@@ -410,7 +410,6 @@ public class PtGen {
 		case 333:
 			po.produire(DIV);
 			break;
-		/*	
 		/*
 		 * 
 		 * 

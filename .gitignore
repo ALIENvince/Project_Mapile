@@ -1,3 +1,4 @@
+#File to ignore when pushing git
 g2java.sh
 g2java.bat
 projetLexer.java
