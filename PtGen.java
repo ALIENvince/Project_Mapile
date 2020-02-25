@@ -239,8 +239,7 @@ public class PtGen {
 			initialisations();
 			break;
 		/*
-		 * 
-		 * 
+		 * Déclaration de constante
 		 */
 		case 71:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
@@ -253,8 +252,7 @@ public class PtGen {
 			break;
 		
 		/*
-		 * 
-		 * 
+		 * Déclaration de variable
 		 */
 		case 81:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
@@ -271,7 +269,7 @@ public class PtGen {
 			po.produire(cptVar);
 			break;
 		/*
-		 * consts : 
+		 * Déclaration du type
 		 */
 		case 91:
 			tCour = ENT;
@@ -289,7 +287,6 @@ public class PtGen {
 			if(indexSymb != 0) {
 				EltTabSymb row = tabSymb[indexSymb];
 				if(row.categorie == VARGLOBALE) {
-						
 					int type = row.type;
 					if(type == BOOL) {
 						po.produire(LIREBOOL);
@@ -312,7 +309,6 @@ public class PtGen {
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb != 0) {
 				EltTabSymb row = tabSymb[indexSymb];
-					
 					int type = row.type;
 					if(type == BOOL) {
 						po.produire(CONTENUG);
@@ -329,7 +325,7 @@ public class PtGen {
 			}
 			break;
 		/*
-		 * 
+		 * Expression ou
 		 */
 		case 281:
 			verifBool();
@@ -338,7 +334,7 @@ public class PtGen {
 			po.produire(OU);
 			break;
 		/*
-		 * 
+		 * Expression ET
 		 */
 		case 291:
 			verifBool();
@@ -348,8 +344,7 @@ public class PtGen {
 			break;
 		
 		/*
-		 * 
-		 * 
+		 * Expression NON
 		 */
 		case 301:
 			verifBool();
@@ -359,8 +354,7 @@ public class PtGen {
 			break;
 			
 		/*
-		 * 
-		 * 
+		 * Expressions EG/DIFF/SUP/SUPEG/INF/INFEG
 		 */
 		case 311:
 			verifEnt();
@@ -384,8 +378,7 @@ public class PtGen {
 			po.produire(INFEG);
 			break;
 		/*
-		 * 
-		 * 
+		 * Expressions + et -
 		 */
 		case 321:
 			verifEnt();
@@ -398,8 +391,7 @@ public class PtGen {
 			break;
 			
 		/*
-		 * 
-		 * 
+		 * Expressions * et div
 		 */
 		case 331:
 			verifEnt();
@@ -411,7 +403,6 @@ public class PtGen {
 			po.produire(DIV);
 			break;
 		/*
-		 * 
 		 * 
 		 */
 		case 341:
@@ -434,7 +425,6 @@ public class PtGen {
 			break;
 		/*
 		 * 
-		 * 
 		 */
 		case 351:
 			tCour = ENT;
@@ -453,7 +443,7 @@ public class PtGen {
 			vCour = FAUX;
 			break;
 		/*
-		 * 
+		 * Affichage de la table des symboles
 		 */
 		case 400:
 			afftabSymb();
