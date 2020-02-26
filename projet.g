@@ -150,7 +150,7 @@ exp1  : exp2 ('et'{PtGen.pt(291);} exp2 {PtGen.pt(291);} {PtGen.pt(292);}  )*
   ;
   
 exp2  : 'non' exp2 {PtGen.pt(301);} {PtGen.pt(302);}
-  | exp3  {PtGen.pt(301);}
+  | exp3
   ;
   
 exp3  : exp4 
@@ -175,7 +175,7 @@ exp5  : primaire
         )*
   ;
   
-primaire: valeur 
+primaire: valeur {PtGen.pt(341);}
   | ident  {PtGen.pt(342);}
   | '(' expression ')'
   ;

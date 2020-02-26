@@ -292,19 +292,20 @@ public class PtGen {
 						po.produire(LIREBOOL);
 					    po.produire(AFFECTERG);
 					    po.produire(tabSymb[indexSymb].info);
+					    tCour = BOOL;
 					} else {
 						po.produire(LIRENT);
 					    po.produire(AFFECTERG);
 					    po.produire(tabSymb[indexSymb].info);
+					    tCour=ENT;
 					}
 				} else {
-					System.out.println("Le type de "+ row.code + " ne permet pas l'écriture");
+					UtilLex.messErr("Le type de "+ row.code + " ne permet pas l'écriture");
 				}
 			} else {
 				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
 			}
 			break;
-
 		case 241: //Ecriture
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb != 0) {
@@ -319,13 +320,18 @@ public class PtGen {
 					    po.produire(row.info);
 					    po.produire(ECRENT);
 					}
-				
 			} else {
 				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
 			}
 			break;
+			
 		/*
-		 * Expression ou
+		 * Affectation ou appel
+		 */
+		case 251:
+			break;
+		/*
+		 * Expression OU
 		 */
 		case 281:
 			verifBool();
@@ -342,7 +348,6 @@ public class PtGen {
 		case 292:
 			po.produire(ET);
 			break;
-		
 		/*
 		 * Expression NON
 		 */
@@ -352,7 +357,6 @@ public class PtGen {
 		case 302:
 			po.produire(NON);
 			break;
-			
 		/*
 		 * Expressions EG/DIFF/SUP/SUPEG/INF/INFEG
 		 */
@@ -453,6 +457,8 @@ public class PtGen {
 			break;
 		case 401:
 			afftabSymb();
+			System.out.println(tCour);
+			System.out.println(vCour);
 			break;
 		default:
 			System.out.println("Point de generation non prevu dans votre liste");
