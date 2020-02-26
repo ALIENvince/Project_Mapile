@@ -195,7 +195,10 @@ public class PtGen {
 	 * Index d'un symbole dans tabSymb
 	 */
 	private static int indexSymb;
-	
+	/**
+	 * Type de l'expression
+	 */
+	private static int typeExpr;
 	/**
 	 *  initialisations A COMPLETER SI BESOIN
 	 *  -------------------------------------
@@ -329,6 +332,30 @@ public class PtGen {
 		 * Affectation ou appel
 		 */
 		case 251:
+			indexSymb = presentIdent(UtilLex.numIdCourant);
+			if(indexSymb != 0) {
+				EltTabSymb row = tabSymb[indexSymb];
+				int type = row.type;
+				if(type == BOOL) {
+					po.produire(CONTENUG);
+				    po.produire(row.info);
+				    typeExpr=BOOL;
+				} else {
+					po.produire(CONTENUG);
+				    po.produire(row.info);
+				    typeExpr=ENT;
+				}
+			} else {
+				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
+			}
+			break;
+		case 252:
+			if(typeExpr == tCour) {
+				po.produire(AFFECTERG);
+				po.produire(indexSymb);
+			} else {
+				UtilLex.messErr("Le type de l'ident et de l'expression sont incompatibles");
+			}
 			break;
 		/*
 		 * Expression OU
