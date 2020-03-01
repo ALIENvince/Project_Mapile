@@ -283,6 +283,46 @@ public class PtGen {
 			break;
 
 		/*
+		 * Boucle if
+		 */
+		case 201:
+			po.produire(BSIFAUX);
+			po.produire(0);
+			pileRep.empiler(po.getIpo());
+			break;
+		case 202:
+			pileRep.empiler(po.getIpo());
+			po.produire(BINCOND);
+			po.produire(0);
+			break;
+		case 203:
+			
+			break;
+		case 204:
+			break;
+		/*
+		 * Boucle cond
+		 */
+		case 211:
+			break;
+		/*
+		 * Boucle ttq	
+		 */
+		case 221:
+			pileRep.empiler(po.getIpo()+1);
+			break;
+		case 222:
+			//Doit on verifier que l'expression est boolean ?
+			po.produire(BSIFAUX);
+			po.produire(0);
+			pileRep.empiler(po.getIpo());
+			break;
+		case 223:
+			po.modifier(pileRep.depiler(), po.getIpo()+3);
+			po.produire(BINCOND);
+			po.produire(pileRep.depiler());
+			break;
+		/*
 		 * Lecture/Ecriture
 		 */
 		case 231: //Lecture
