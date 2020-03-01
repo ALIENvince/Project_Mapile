@@ -1,4 +1,4 @@
-
+					
 import java.io.*;
 
 public class TPileRep {
@@ -13,7 +13,7 @@ public class TPileRep {
     	
     	public void empiler(int x) {
     		if (ip==MAXPILEREP) 
-    			UtilLex.messErr("debordement de la pile de gestion des reprises");
+    		UtilLex.messErr("debordement de la pile de gestion des reprises");
     		ip=ip+1;T[ip]=x;
     	}
     	

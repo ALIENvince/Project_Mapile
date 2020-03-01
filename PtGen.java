@@ -198,7 +198,7 @@ public class PtGen {
 	/**
 	 * Type de l'expression
 	 */
-	private static int typeExpr;
+	private static int typeIdent;
 	/**
 	 *  initialisations A COMPLETER SI BESOIN
 	 *  -------------------------------------
@@ -213,6 +213,8 @@ public class PtGen {
 		cptVar = 0;
 		
 		indexSymb=0;
+		
+		typeIdent=0;
 		
 		// pile des reprises pour compilation des branchements en avant
 		pileRep = new TPileRep(); 
@@ -277,7 +279,6 @@ public class PtGen {
 		case 91:
 			tCour = ENT;
 			break;
-
 		case 92:
 			tCour = BOOL;
 			break;
@@ -296,9 +297,12 @@ public class PtGen {
 			po.produire(0);
 			break;
 		case 203:
-			
+			int tmp = pileRep.depiler();
+			po.modifier(pileRep.depiler(), po.getIpo()+1);
+			pileRep.empiler(tmp);
 			break;
 		case 204:
+			po.modifier(pileRep.depiler(), po.getIpo());
 			break;
 		/*
 		 * Boucle cond
@@ -379,18 +383,18 @@ public class PtGen {
 				if(type == BOOL) {
 					po.produire(CONTENUG);
 				    po.produire(row.info);
-				    typeExpr=BOOL;
+				    typeIdent=BOOL;
 				} else {
 					po.produire(CONTENUG);
 				    po.produire(row.info);
-				    typeExpr=ENT;
+				    typeIdent=ENT;
 				}
 			} else {
 				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
 			}
 			break;
 		case 252:
-			if(typeExpr == tCour) {
+			if(typeIdent == tCour) {
 				po.produire(AFFECTERG);
 				po.produire(indexSymb);
 			} else {
@@ -401,63 +405,48 @@ public class PtGen {
 		 * Expression OU
 		 */
 		case 281:
-			verifBool();
-			break;
-		case 282:
 			po.produire(OU);
 			break;
 		/*
 		 * Expression ET
 		 */
 		case 291:
-			verifBool();
-			break;
-		case 292:
 			po.produire(ET);
 			break;
 		/*
 		 * Expression NON
 		 */
 		case 301:
-			verifBool();
-			break;
-		case 302:
 			po.produire(NON);
 			break;
 		/*
 		 * Expressions EG/DIFF/SUP/SUPEG/INF/INFEG
 		 */
 		case 311:
-			verifEnt();
-			break;
-		case 312:
 			po.produire(EG);
 			break;
-		case 313:
+		case 312:
 			po.produire(DIFF);
 			break;
-		case 314:
+		case 313:
 			po.produire(SUP);
 			break;
-		case 315:
+		case 314:
 			po.produire(SUPEG);
 			break;
-		case 316:
+		case 315:
 			po.produire(INF);
 			break;
-		case 317:
+		case 316:
 			po.produire(INFEG);
 			break;
 		/*
 		 * Expressions + et -
 		 */
 		case 321:
-			verifEnt();
-			break;
-		case 322:
 			po.produire(ADD);
 			break;
-		case 323:
+		case 322:
 			po.produire(SOUS);
 			break;
 			
@@ -465,12 +454,9 @@ public class PtGen {
 		 * Expressions * et div
 		 */
 		case 331:
-			verifEnt();
-			break;
-		case 332:
 			po.produire(MUL);
 			break;
-		case 333:
+		case 332:
 			po.produire(DIV);
 			break;
 		/*
@@ -522,7 +508,20 @@ public class PtGen {
 			po.constGen();
 			/* TODO : Verif pile vide */
 			break;
+		/*
+		 * Verification du type Entier
+		 */
 		case 401:
+			verifEnt();
+			break;
+		/*
+		 * Verification du type Booléen
+		 */
+		case 402:
+			verifBool();
+			break;
+		
+		case 403:
 			afftabSymb();
 			System.out.println(tCour);
 			System.out.println(vCour);
