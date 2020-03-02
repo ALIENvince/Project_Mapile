@@ -84,7 +84,7 @@ ptvg  : ';'
   | 
   ;
   
-corps : 'debut' {PtGen.pt(403);} instructions 'fin'
+corps : 'debut' {PtGen.pt(403);} instructions 'fin' {PtGen.pt(131);}
   ;
   
 parfixe: 'fixe' '(' pf ( ';' pf)* ')'
@@ -113,10 +113,10 @@ instruction
   |
   ;
   
-inssi : 'si' expression {PtGen.pt(201);} 'alors' instructions {PtGen.pt(202);} ('sinon' {PtGen.pt(203);} instructions)? 'fsi' {PtGen.pt(204);} 
+inssi : 'si' expression {PtGen.pt(201);} 'alors' instructions {PtGen.pt(202);} ('sinon' instructions)? 'fsi'{PtGen.pt(203);}
   ;
   
-inscond : 'cond'  expression  ':' instructions 
+inscond : 'cond'  expression {PtGen.pt(211);} ':' instructions {PtGen.pt(212);}
           (','  expression  ':' instructions )* 
           ('aut'  instructions |  ) 
           'fcond' 
@@ -132,7 +132,7 @@ ecriture: 'ecrire' '(' expression {PtGen.pt(241);} ( ',' expression {PtGen.pt(24
    ;
   
 affouappel
-  : ident {PtGen.pt(251);} (    ':=' expression {PtGen.pt(252);}
+  : ident {PtGen.pt(251);} ( ':=' expression {PtGen.pt(252);}
             |   (effixes (effmods)?)?  
            )
   ;
