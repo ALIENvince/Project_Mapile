@@ -200,9 +200,10 @@ public class PtGen {
 	 */
 	private static int typeIdent;
 	/**
-	 *  initialisations A COMPLETER SI BESOIN
-	 *  -------------------------------------
+	 * Compteur d'expression dans un cond
 	 */
+	private static int cptCond;
+	
 	public static void initialisations() {
 	
 		// indices de gestion de la table des symboles
@@ -215,6 +216,8 @@ public class PtGen {
 		indexSymb=0;
 		
 		typeIdent=0;
+		
+		cptCond = 0;
 		
 		// pile des reprises pour compilation des branchements en avant
 		pileRep = new TPileRep(); 
@@ -293,9 +296,13 @@ public class PtGen {
 		 * Boucle if
 		 */
 		case 201:
-			po.produire(BSIFAUX);
-			po.produire(0);
-			pileRep.empiler(po.getIpo());
+			if(tCour == BOOL) {
+				po.produire(BSIFAUX);
+				po.produire(0);
+				pileRep.empiler(po.getIpo());
+			} else {
+				UtilLex.messErr("Expression de si invalide");
+			}
 			break;
 		case 202:
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
@@ -320,6 +327,13 @@ public class PtGen {
 			po.produire(0);
 			pileRep.empiler(po.getIpo());
 			break;
+		case 213:
+			po.produire(BINCOND);
+			po.produire(po.getIpo()+1);
+			break;
+		case 214:
+			
+			break;
 		/*
 		 * Boucle ttq	
 		 */
@@ -327,10 +341,13 @@ public class PtGen {
 			pileRep.empiler(po.getIpo()+1);
 			break;
 		case 222:
-			//TODO ccheck expr boolean
-			po.produire(BSIFAUX);
-			po.produire(0);
-			pileRep.empiler(po.getIpo());
+			if(tCour == BOOL ) {
+				po.produire(BSIFAUX);
+				po.produire(0);
+				pileRep.empiler(po.getIpo());
+			} else {
+				UtilLex.messErr("Expression du ttq invalide");
+			}
 			break;
 		case 223:
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
