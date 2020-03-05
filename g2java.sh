@@ -13,7 +13,7 @@ then
 fi
 
 # Tests if the ANTLR file is readable
-ANTLR_JAR=/share/l3info/CMPL/antlr/antlr-3.5.2-complete.jar
+ANTLR_JAR=/d/CMP/antlr-3.5.2-complete.jar
 if [ ! -r $ANTLR_JAR ]
 then
   echo "error: could not read ANTLR Jar file: $ANTLR_JAR"
@@ -28,6 +28,6 @@ then
   exit 2
 fi
 
-export CLASSPATH=/share/l3info/CMPL/antlr/antlr-3.5.2-complete.jar:.:$CLASSPATH
+export CLASSPATH=/d/CMP/antlr-3.5.2-complete.jar:.:$CLASSPATH
 java org.antlr.Tool $1
 

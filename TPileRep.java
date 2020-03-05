@@ -35,6 +35,15 @@ public class TPileRep {
 			res = res +  "}";
 			System.out.println(res);
 		}
+		
+		public String isEmpty() {
+			if (ip == 0) {
+				return "Pile vide";
+			} else {
+				return "Pile non vide";
+			}
+					
+		}
     } // TpileRep
    
 

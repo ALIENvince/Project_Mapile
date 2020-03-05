@@ -1,6 +1,6 @@
 // Grammaire du langage PROJET
 // CMPL L3info 
-// Nathalie Girard, Anne Grazon, Veronique Masson
+// Lohier, Faye, Jullion
 // il convient d'y inserer les appels a {PtGen.pt(k);}
 // relancer Antlr apres chaque modification et raffraichir le projet Eclipse le cas echeant
 
@@ -84,7 +84,7 @@ ptvg  : ';'
   | 
   ;
   
-corps : 'debut' {PtGen.pt(403);} instructions 'fin' {PtGen.pt(131);}
+corps : 'debut' instructions 'fin' {PtGen.pt(131);}
   ;
   
 parfixe: 'fixe' '(' pf ( ';' pf)* ')'
@@ -116,10 +116,10 @@ instruction
 inssi : 'si' expression {PtGen.pt(201);} 'alors' instructions {PtGen.pt(202);} ('sinon' instructions)? 'fsi'{PtGen.pt(203);}
   ;
   
-inscond : 'cond'  expression {PtGen.pt(211);} ':' instructions {PtGen.pt(212);}
-          (','  expression {PtGen.pt(211);} ':' instructions {PtGen.pt(212);} )* 
-          ('aut'  instructions {PtGen.pt(213);} |  ) 
-          'fcond' {PtGen.pt(214);}
+inscond : 'cond' {PtGen.pt(211);} expression {PtGen.pt(212);} ':' instructions {PtGen.pt(213);}
+          (','  expression {PtGen.pt(212);} ':' instructions {PtGen.pt(213);} )* 
+          ('aut'  instructions {PtGen.pt(214);} |  ) 
+          'fcond' {PtGen.pt(215);}
   ;
   
 boucle  : 'ttq' {PtGen.pt(221);} expression {PtGen.pt(222);} 'faire' instructions 'fait' {PtGen.pt(223);}

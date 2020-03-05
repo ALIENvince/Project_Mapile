@@ -249,13 +249,15 @@ public class PtGen {
 		/*
 		 * Déclaration de constante
 		 */
+			
 		case 71:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
+			//On verifie que la constante n'est pas dans la table des Symboles
 			if (indexSymb < 1) {
 			    placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
 			}
 			else {
-				UtilLex.messErr("La variable : " + " est deja declaree" );
+				UtilLex.messErr("La constante : " + UtilLex.chaineIdent(UtilLex.numIdCourant) +" est deja declaree" );
 			}
 			break;
 		
@@ -264,15 +266,17 @@ public class PtGen {
 		 */
 		case 81:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
+			//On verifie que la constante n'est pas dans la table des Symboles
 			if(indexSymb < 1){
 			    placeIdent(UtilLex.numIdCourant, VARGLOBALE, tCour, cptVar);
 			    cptVar++;
 			}
 			else {
-			    UtilLex.messErr("La variable : "  + " est deja declaree" );
+			    UtilLex.messErr("La variable : " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " est deja declaree" );
 			}
 			break;
 		case 82:
+			//On reserve le nombre de variables vus lors du rajout dans tabSymb
 			po.produire(RESERVER);
 			po.produire(cptVar);
 			break;
@@ -317,40 +321,43 @@ public class PtGen {
 		 * Boucle cond
 		 */
 		case 211:
-			po.produire(BSIFAUX);
-			po.produire(0);
 			pileRep.empiler(0);
-			pileRep.empiler(po.getIpo());
 			break;
 		case 212:
-			int temp = pileRep.depiler();
-			po.modifier(temp, po.getIpo()+3);
-			po.produire(BINCOND);
-			po.produire(temp);
+			po.produire(BSIFAUX);
+			po.produire(0);
 			pileRep.empiler(po.getIpo());
 			break;
 		case 213:
+			//maj bsifaux et depile la deuxieme valeur dans la pile
+			po.modifier(pileRep.depiler(), po.getIpo()+3);
+			po.produire(BINCOND);
+			po.produire(pileRep.depiler());
+			pileRep.empiler(po.getIpo());
+			break;
+		case 214:
 			po.produire(BINCOND);
 			po.produire(po.getIpo()+1);
 			break;
-		case 214: //Remonter la pile de reprise
+		case 215: //Remonter la pile de reprise
 			cptCond=pileRep.depiler();
-			int adfin = po.getIpo();
-			int ligne = 0;
 			while(po.getElt(cptCond) != 0) {
-				ligne = po.getElt(cptCond);
-				po.modifier(cptCond, adfin);
-				cptCond=ligne;
-				pileRep.affiche();			}
+				int tmp = po.getElt(cptCond);
+				po.modifier(cptCond, po.getIpo()+1);
+				cptCond=tmp;
+			}
+			po.modifier(cptCond, po.getIpo()+1);
 			break;
+			
 		/*
 		 * Boucle ttq	
 		 */
-		case 221:
+			
+		case 221: //On empile la numéro de la ligne de la condition
 			pileRep.empiler(po.getIpo()+1);
 			break;
 		case 222:
-			if(tCour == BOOL ) {
+			if(tCour == BOOL ) { //Si la condition est de type booléen, on produit un BSIFAUX
 				po.produire(BSIFAUX);
 				po.produire(0);
 				pileRep.empiler(po.getIpo());
@@ -358,15 +365,18 @@ public class PtGen {
 				UtilLex.messErr("Expression du ttq invalide");
 			}
 			break;
-		case 223:
+		case 223: //On modifie le bisfaux qui nous permet de sortir de la boucle si la condition est fausse, sinon on remonte vers la condition avec un bincond
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(pileRep.depiler());
 			break;
+			
 		/*
 		 * Lecture/Ecriture
 		 */
-		case 231: //Lecture
+		
+		//Lecture	
+		case 231:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb != 0) {
 				EltTabSymb row = tabSymb[indexSymb];
@@ -390,7 +400,9 @@ public class PtGen {
 				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
 			}
 			break;
-		case 241: //Ecriture
+			
+		//Ecriture	
+		case 241:
 			if(tCour==BOOL) {
 				po.produire(ECRBOOL);
 			} else if (tCour==ENT) {
@@ -399,9 +411,12 @@ public class PtGen {
 				UtilLex.messErr("Type d'expression non connu");
 			}
 			break;
+			
 		/*
 		 * Affectation ou appel
 		 */
+			
+		//Recuperation du type de l'ident, si il est present dans la table des symboles	
 		case 251:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb != 0) {
@@ -416,8 +431,10 @@ public class PtGen {
 				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
 			}
 			break;
+			
+		//Verification de la concordance entre le type de l'ident et de l'expression que l'on lui affecte	
 		case 252:
-			if(typeIdent == tCour) {
+			if(typeIdent == tCour) { 
 				EltTabSymb row = tabSymb[indexSymb];
 				po.produire(AFFECTERG);
 				po.produire(row.info);
@@ -425,50 +442,67 @@ public class PtGen {
 				UtilLex.messErr("Le type de l'ident et de l'expression sont incompatibles");
 			}
 			break;
+			
 		/*
 		 * Expression OU
 		 */
+			
+		// exp1 ou exp2
 		case 281:
 			po.produire(OU);
 			tCour=BOOL;
 			break;
+			
 		/*
 		 * Expression ET
 		 */
+			
+		// exp1 et exp2
 		case 291:
 			po.produire(ET);
 			tCour=BOOL;
 			break;
+			
 		/*
 		 * Expression NON
 		 */
+			
+		// non exp
 		case 301:
 			po.produire(NON);
 			tCour=BOOL;
 			break;
+			
 		/*
 		 * Expressions EG/DIFF/SUP/SUPEG/INF/INFEG
 		 */
+			
+		// '='	
 		case 311:
 			po.produire(EG);
 			tCour=BOOL;
 			break;
+		// '<>'
 		case 312:
 			po.produire(DIFF);
 			tCour=BOOL;
 			break;
+		// '>'
 		case 313:
 			po.produire(SUP);
 			tCour=BOOL;
 			break;
+		// '>='
 		case 314:
 			po.produire(SUPEG);
 			tCour=BOOL;
 			break;
+		// '<'
 		case 315:
 			po.produire(INF);
 			tCour=BOOL;
 			break;
+		// '<='
 		case 316:
 			po.produire(INFEG);
 			tCour=BOOL;
@@ -476,10 +510,13 @@ public class PtGen {
 		/*
 		 * Expressions + et -
 		 */
+		
+		// '+'
 		case 321:
 			po.produire(ADD);
 			tCour=ENT;
 			break;
+		// '-' 	
 		case 322:
 			po.produire(SOUS);
 			tCour=ENT;
@@ -488,89 +525,104 @@ public class PtGen {
 		/*
 		 * Expressions * et div
 		 */
+			
+		// '*'
 		case 331:
 			po.produire(MUL);
 			tCour=ENT;
 			break;
+		// 'div'
 		case 332:
 			po.produire(DIV);
 			tCour=ENT;
 			break;
 		/*
-		 * 
+		 * Definition d'un type primaire
 		 */
-		case 341:
+		
+		//Valeur	
+		case 341: 
 			po.produire(EMPILER);
 			po.produire(vCour);
 			break;
+		//Ident
 		case 342:
 			int k = presentIdent(1);
 			if(k > 0) {
-				if (tabSymb[k].categorie == CONSTANTE ) {
+				if (tabSymb[k].categorie == CONSTANTE ) { //Si l'ident est une constante
 					po.produire( EMPILER );
 					po.produire( tabSymb[k].info );
 					tCour = tabSymb[k].type; 
-				} else if (tabSymb[k].categorie == VARGLOBALE) { 
+				} else if (tabSymb[k].categorie == VARGLOBALE) { //Si l'ident est un ident
 					po.produire ( CONTENUG );
 					po.produire( tabSymb[k].info  );
 					tCour = tabSymb[k].type; 
 				} else {
-				    UtilLex.messErr("Nul");
+				    UtilLex.messErr("Type non reconnu");
 				}
 			} else {
 				UtilLex.messErr("Ident non déclarée");
 			}
 			break;
+			
 		/*
-		 * 
+		 * Définition des différentes valeurs
 		 */
+		
+		//Entier positif
 		case 351:
 			tCour = ENT;
 			vCour = UtilLex.valEnt;
 			break;
+		//Entier négatif
 		case 352:
 			tCour = ENT;
 			vCour = - UtilLex.valEnt;
 			break;
+		//Booléen vrai
 		case 353:
 			tCour = BOOL;
 			vCour = VRAI;
 			break;
+		//Booléan true
 		case 354:
 			tCour = BOOL;
 			vCour = FAUX;
 			break;
+			
 		/*
 		 * Affichage de la table des symboles
 		 */
+			
 		case 400:
 			afftabSymb();
 			po.constObj();
 			po.constGen();
-			/* TODO : Verif pile vide */
+			/* Fct rajouté pour vérifier si la pile est vide */
+			System.out.println(pileRep.isEmpty());
 			break;
+			
 		/*
 		 * Verification du type Entier
 		 */
+			
 		case 401:
 			verifEnt();
 			break;
+			
 		/*
 		 * Verification du type Booléen
 		 */
+			
 		case 402:
 			verifBool();
 			break;
-		
-		case 403:
-			afftabSymb();
-			System.out.println(tCour);
-			System.out.println(vCour);
-			break;
+		/*
+		 * Point de génération non reconnu	
+		 */
 		default:
 			System.out.println("Point de generation non prevu dans votre liste");
 			break;
-
 		}
 	}
 }
