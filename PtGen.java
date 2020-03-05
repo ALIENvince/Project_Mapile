@@ -116,7 +116,7 @@ public class PtGen {
     // autres variables fournies
     // -------------------------
     
-    public static String trinome="Lohier_Faye_Jullion"; 
+    public static String trinome="LohierFayeJullion"; 
     
     private static int tCour; // type de l'expression compilee
     private static int vCour; // sert uniquement lors de la compilation d'une valeur (entiere ou boolenne)
@@ -319,20 +319,29 @@ public class PtGen {
 		case 211:
 			po.produire(BSIFAUX);
 			po.produire(0);
+			pileRep.empiler(0);
 			pileRep.empiler(po.getIpo());
 			break;
 		case 212:
-			po.modifier(pileRep.depiler(), po.getIpo()+3);
+			int temp = pileRep.depiler();
+			po.modifier(temp, po.getIpo()+3);
 			po.produire(BINCOND);
-			po.produire(0);
+			po.produire(temp);
 			pileRep.empiler(po.getIpo());
 			break;
 		case 213:
 			po.produire(BINCOND);
 			po.produire(po.getIpo()+1);
 			break;
-		case 214:
-			
+		case 214: //Remonter la pile de reprise
+			cptCond=pileRep.depiler();
+			int adfin = po.getIpo();
+			int ligne = 0;
+			while(po.getElt(cptCond) != 0) {
+				ligne = po.getElt(cptCond);
+				po.modifier(cptCond, adfin);
+				cptCond=ligne;
+				pileRep.affiche();			}
 			break;
 		/*
 		 * Boucle ttq	

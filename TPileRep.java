@@ -24,6 +24,17 @@ public class TPileRep {
 		}
 		// constructeur
 		public TPileRep() {ip=0;}
+		
+		public void affiche() {
+			String res = "{";
+			int var =  ip;
+			while(var!=0) {
+				res = res + " " + T[var] + "  ;";
+				var--;
+			}
+			res = res +  "}";
+			System.out.println(res);
+		}
     } // TpileRep
    
 
