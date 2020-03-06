@@ -185,7 +185,6 @@ public class PtGen {
 		System.out.println();
 	}
     
-
 	/**
 	 * Déclarations de variables utiles
 	 */
@@ -195,10 +194,12 @@ public class PtGen {
 	 * Index d'un symbole dans tabSymb
 	 */
 	private static int indexSymb;
+	
 	/**
 	 * Type de l'expression
 	 */
 	private static int typeIdent;
+	
 	/**
 	 * Compteur d'expression dans un cond
 	 */
@@ -210,7 +211,6 @@ public class PtGen {
 		it = 0;
 		bc = 1;
 		
-		// Compteur de variables/constante
 		cptVar = 0;
 		
 		indexSymb=0;
@@ -257,7 +257,7 @@ public class PtGen {
 			    placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
 			}
 			else {
-				UtilLex.messErr("La constante : " + UtilLex.chaineIdent(UtilLex.numIdCourant) +" est deja declaree" );
+				UtilLex.messErr("La constante ' " + UtilLex.chaineIdent(UtilLex.numIdCourant) +" ' est deja declaree" );
 			}
 			break;
 		
@@ -272,7 +272,7 @@ public class PtGen {
 			    cptVar++;
 			}
 			else {
-			    UtilLex.messErr("La variable : " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " est deja declaree" );
+			    UtilLex.messErr("La variable ' " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' est deja declaree" );
 			}
 			break;
 		case 82:
@@ -303,7 +303,7 @@ public class PtGen {
 			if(tCour == BOOL) {
 				po.produire(BSIFAUX);
 				po.produire(0);
-				pileRep.empiler(po.getIpo());
+				pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			} else {
 				UtilLex.messErr("Expression de si invalide");
 			}
@@ -312,7 +312,7 @@ public class PtGen {
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(0);
-			pileRep.empiler(po.getIpo());
+			pileRep.empiler(po.getIpo()); // on retient le trou du bincond
 			break;
 		case 203:
 			po.modifier(pileRep.depiler(), po.getIpo()+1);
@@ -326,14 +326,14 @@ public class PtGen {
 		case 212:
 			po.produire(BSIFAUX);
 			po.produire(0);
-			pileRep.empiler(po.getIpo());
+			pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			break;
 		case 213:
 			//maj bsifaux et depile la deuxieme valeur dans la pile
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(pileRep.depiler());
-			pileRep.empiler(po.getIpo());
+			pileRep.empiler(po.getIpo()); // on retient le trou du bincond
 			break;
 		case 214:
 			po.produire(BINCOND);
@@ -360,7 +360,7 @@ public class PtGen {
 			if(tCour == BOOL ) { //Si la condition est de type booléen, on produit un BSIFAUX
 				po.produire(BSIFAUX);
 				po.produire(0);
-				pileRep.empiler(po.getIpo());
+				pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			} else {
 				UtilLex.messErr("Expression du ttq invalide");
 			}
@@ -394,10 +394,10 @@ public class PtGen {
 					    tCour=ENT;
 					}
 				} else {
-					UtilLex.messErr("Le type de "+ row.code + " ne permet pas l'écriture");
+					UtilLex.messErr("Le type de ' "+ UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' ne permet pas l'écriture");
 				}
 			} else {
-				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
+				UtilLex.messErr( "' " +UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -428,7 +428,7 @@ public class PtGen {
 				    typeIdent=ENT;
 				}
 			} else {
-				UtilLex.messErr(UtilLex.numIdCourant + " n'est pas dans la table des symboles");
+				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + " n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -598,8 +598,17 @@ public class PtGen {
 			afftabSymb();
 			po.constObj();
 			po.constGen();
-			/* Fct rajouté pour vérifier si la pile est vide */
+			/* Fct rajouté pour vérifier si la pile est vide 
 			System.out.println(pileRep.isEmpty());
+				
+				public String isEmpty() {
+					if (ip == 0) {
+						return "Pile vide";
+					} else {
+						return "Pile non vide";
+					}		
+				}
+			*/
 			break;
 			
 		/*
