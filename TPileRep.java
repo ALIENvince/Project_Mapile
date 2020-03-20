@@ -41,8 +41,7 @@ public class TPileRep {
 				return "Pile vide";
 			} else {
 				return "Pile non vide";
-			}
-					
+			}		
 		}
     } // TpileRep
    

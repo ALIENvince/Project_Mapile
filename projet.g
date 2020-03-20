@@ -34,7 +34,7 @@ import java.io.FileInputStream;
 catch (RecognitionException e) {reportError (e) ; throw e ; }}
 
 
-unite  :   unitprog {PtGen.pt(400);} EOF
+unite  :   unitprog {PtGen.pt(400);} {PtGen.pt(11);} EOF
       |    unitmodule  EOF
   ;
   
@@ -74,29 +74,29 @@ type  : 'ent' {PtGen.pt(91);}
   |     'bool' {PtGen.pt(92);}
   ;
   
-decprocs: (decproc ptvg)+
+decprocs: {PtGen.pt(101);} (decproc ptvg)+ {PtGen.pt(102);}
   ;
   
-decproc :  'proc'  ident  parfixe? parmod? consts? vars? corps 
+decproc :  'proc' ident {PtGen.pt(112);} parfixe? parmod? {PtGen.pt(113);} consts? vars? corps {PtGen.pt(118);}
   ;
   
 ptvg  : ';'
   | 
   ;
   
-corps : 'debut' instructions 'fin' {PtGen.pt(131);}
+corps : 'debut' instructions 'fin'
   ;
   
 parfixe: 'fixe' '(' pf ( ';' pf)* ')'
   ;
   
-pf  : type ident  ( ',' ident  )*  
+pf  : type ident {PtGen.pt(151);} ( ',' ident {PtGen.pt(151);} )*  
   ;
 
 parmod  : 'mod' '(' pm ( ';' pm)* ')'
   ;
   
-pm  : type ident  ( ',' ident  )*
+pm  : type ident {PtGen.pt(171);} ( ',' ident {PtGen.pt(171);} )*
   ;
   
 instructions
@@ -113,12 +113,12 @@ instruction
   |
   ;
   
-inssi : 'si' expression {PtGen.pt(201);} 'alors' instructions {PtGen.pt(202);} ('sinon' instructions)? 'fsi'{PtGen.pt(203);}
+inssi : 'si' expression {PtGen.pt(201);} 'alors' instructions ('sinon' {PtGen.pt(202);} instructions)? 'fsi'{PtGen.pt(203);}
   ;
   
-inscond : 'cond' {PtGen.pt(211);} expression {PtGen.pt(212);} ':' instructions {PtGen.pt(213);}
-          (','  expression {PtGen.pt(212);} ':' instructions {PtGen.pt(213);} )* 
-          ('aut'  instructions {PtGen.pt(214);} |  ) 
+inscond : 'cond' {PtGen.pt(211);} expression {PtGen.pt(212);} ':' instructions 
+          (',' {PtGen.pt(213);} expression {PtGen.pt(212);} ':' instructions )* 
+          ('aut' {PtGen.pt(213);} instructions | {PtGen.pt(214);} ) 
           'fcond' {PtGen.pt(215);}
   ;
   
@@ -133,14 +133,14 @@ ecriture: 'ecrire' '(' expression {PtGen.pt(241);} ( ',' expression {PtGen.pt(24
   
 affouappel
   : ident {PtGen.pt(251);} ( ':=' expression {PtGen.pt(252);}
-            |   (effixes (effmods)?)?  
+            | {PtGen.pt(253);} (effixes {PtGen.pt(254);} (effmods)? {PtGen.pt(255);} )? {PtGen.pt(256);}
            )
   ;
   
-effixes : '(' (expression  (',' expression  )*)? ')'
+effixes : '(' (expression  {PtGen.pt(261);} (',' expression {PtGen.pt(261);} )*)? ')'
   ;
   
-effmods :'(' (ident  (',' ident  )*)? ')'
+effmods :'(' (ident {PtGen.pt(271);} (',' ident {PtGen.pt(271);} )*)? ')'
   ; 
   
 expression: (exp1) ('ou' {PtGen.pt(402);}  exp1 {PtGen.pt(402);} {PtGen.pt(281);} )*
