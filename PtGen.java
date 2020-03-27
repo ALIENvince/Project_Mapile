@@ -316,6 +316,7 @@ public class PtGen {
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			//On verifie que la constante n'est pas dans la table des Symboles
 			if(indexSymb < 1){
+				//Si on est dans une procedure, on la rajoute dans tabSymb telle une variable locale
 			    if(bc > 1) {
 			    	placeIdent(UtilLex.numIdCourant,VARLOCALE,tCour,cptVarLoc+nbParamProc+2);
 			    	cptVarLoc++;
@@ -329,7 +330,7 @@ public class PtGen {
 			}
 			break;
 		case 82:
-			//On reserve le nombre de variables vus lors du rajout dans tabSymb
+			//On reserve le nombre de variables vus lors du rajout dans tabSymb, selon la valeur du bloc courant
 			if(bc>1) {
 				po.produire(RESERVER);
 				po.produire(cptVarLoc);
@@ -352,12 +353,13 @@ public class PtGen {
 		 * Gestion de toutes les procédures
 		 */
 		case 101:
+			//On place un bincond avant la déclaration des proc
 			po.produire(BINCOND);
 			po.produire(0);
 			pileRep.empiler(po.getIpo());
 			break;
-			
 		case 102:
+			//On modifie le bincond pour définir la ligne de retour après la déclaration
 			po.modifier(pileRep.depiler(),po.getIpo()+1);
 			break;
 		/*
@@ -365,14 +367,15 @@ public class PtGen {
 		 */
 			
 		case 112:
-			indexSymb = presentIdent(UtilLex.numIdCourant	);
+			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb < 1) {
+				//Si le nom de la procédure n'est pas dans tabSymb, on rajoute dans tabSymb et on définit le bloc courant
 				nbParamProc = 0;
 				placeIdent(UtilLex.numIdCourant,PROC,NEUTRE,po.getIpo()+1);
 				placeIdent(-1,PRIVEE,NEUTRE,0);
 				bc=it+1;
 			} else {
-				UtilLex.messErr("Nom de processus deja présent dans la table des symboles");
+				UtilLex.messErr("Nom de processus " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " deja présent dans la table des symboles");
 			}
 			break;
 			
@@ -624,10 +627,6 @@ public class PtGen {
 				nbParamMod++;
 				i++;
 			}
-			System.out.println("Nb param de " + tabSymb[indexSymb].code);
-			System.out.println(nbParamFix);
-			System.out.println(nbParamMod);
-			System.out.println();
 			break;
 		
 		//Verification du nombre de param fix lors de l'appel d'une proc
