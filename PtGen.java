@@ -235,6 +235,21 @@ public class PtGen {
 	 */
 	private static int indexIdent;
 	
+	/**
+	 * Compteur du nombre de reference a un module
+	 */
+	private static int cptRef;
+	
+	/**
+	 * Compteur du nombre de définition d'un module
+	 */
+	private static int cptDef;
+	
+	/**
+	 * Nom d'un procédure
+	 */
+	private static String nom;
+	
 	public static void initialisations() {
 	
 		// indices de gestion de la table des symboles
@@ -260,6 +275,12 @@ public class PtGen {
 		cptParamProc=0;
 		
 		indexIdent = 0;
+		
+		cptRef = 0;
+		
+		cptDef = 0;
+		
+		nom="";
 		
 		// pile des reprises pour compilation des branchements en avant
 		pileRep = new TPileRep(); 
@@ -289,15 +310,86 @@ public class PtGen {
 			break;
 			
 		/*
-		 * Arret du programme
+		 * Initialisation/Arret du programme
 		 */
 		case 11:
+			cptDef = 0;
+			cptRef = 0;
+			desc = new Descripteur();
+			desc.setUnite("programme");
+			break;
+			
+		case 12:
+			desc.setTailleCode(po.getIpo());
 			po.produire(ARRET);
 			break;
+			
+		/*
+		 * Initialisation du module
+		 */
+			
+		case 21:
+			cptDef = 0;
+			cptRef = 0;
+			desc = new Descripteur();
+			desc.setUnite("module");
+			break;
+			
+		case 23:
+			desc.setTailleCode(po.getIpo());
+			break;
+			
+		/*
+		 * Définitions de procédures
+		 */
+		case 41:
+			nom = UtilLex.chaineIdent(UtilLex.numIdCourant);
+			if(desc.getNbDef() < 10 ) {
+				if(desc.presentDef(nom) == 0) {
+					desc.ajoutDef(nom);
+				} else {
+					UtilLex.messErr(nom + " déja présent dans la table des procédures définies en DEF");
+				}
+			} else {
+				UtilLex.messErr("Taille Maximum de la table des procédurés définies en DEF atteinte");
+			}
+			break;
+			
+		/**
+		 * TODO
+		 */
+		case 51:
+			tabSymb[indexSymb+1].info = nbParamProc;
+			break;
+			
+		/**
+		 * TODO
+		 */
+		case 61:
+			indexSymb = presentIdent(UtilLex.numIdCourant);
+			if(indexSymb < 1) {
+				nbParamProc = 0;
+				placeIdent(UtilLex.numIdCourant,PROC,NEUTRE,1);
+				placeIdent(-1,REF,NEUTRE,0);
+				desc.ajoutRef(UtilLex.chaineIdent(UtilLex.numIdCourant));
+			} else {
+				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + " est déja présent dans la table des références");
+			}
+			break;
+		
+		case 62:
+			placeIdent(-1,PARAMFIXE,tCour,nbParamProc);
+			nbParamProc++;
+			break;
+		
+		case 63:
+			placeIdent(-1,PARAMMOD,tCour,nbParamProc);
+			nbParamProc++;
+			break;
+			
 		/*
 		 * Déclaration de constante
 		 */
-			
 		case 71:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			//On verifie que la constante n'est pas dans la table des Symboles
@@ -331,12 +423,17 @@ public class PtGen {
 			break;
 		case 82:
 			//On reserve le nombre de variables vus lors du rajout dans tabSymb, selon la valeur du bloc courant
-			if(bc>1) {
-				po.produire(RESERVER);
-				po.produire(cptVarLoc);
+			if(desc.getUnite() == "programme") {
+				if(bc>1) {
+					po.produire(RESERVER);
+					po.produire(cptVarLoc);
+				} else {
+					po.produire(RESERVER);
+					po.produire(cptVarGlo);
+					desc.setTailleGlobaux(cptVarGlo);
+				}
 			} else {
-				po.produire(RESERVER);
-				po.produire(cptVarGlo);
+				desc.setTailleGlobaux(cptVarGlo);
 			}
 			break;
 		/*
@@ -353,39 +450,53 @@ public class PtGen {
 		 * Gestion de toutes les procédures
 		 */
 		case 101:
-			//On place un bincond avant la déclaration des proc
-			po.produire(BINCOND);
-			po.produire(0);
-			pileRep.empiler(po.getIpo());
+			if(desc.getUnite().equals("programme")) {
+				//On place un bincond avant la déclaration des proc
+				po.produire(BINCOND);
+				po.produire(0);
+				/* Ajout d'une ligne au vecteur de translation */
+				modifVecteurTrans(TRANSCODE);
+				pileRep.empiler(po.getIpo());
+			}
 			break;
 		case 102:
-			//On modifie le bincond pour définir la ligne de retour après la déclaration
-			po.modifier(pileRep.depiler(),po.getIpo()+1);
+			if(desc.getUnite().equals("programme")) {
+				//On modifie le bincond pour définir la ligne de retour après la déclaration
+				po.modifier(pileRep.depiler(),po.getIpo()+1);
+			}
 			break;
 		/*
 		 * Initialisation d'une procedure
 		 */
 			
-		case 112:
+		case 111:
 			indexSymb = presentIdent(UtilLex.numIdCourant);
 			if(indexSymb < 1) {
 				//Si le nom de la procédure n'est pas dans tabSymb, on rajoute dans tabSymb et on définit le bloc courant
 				nbParamProc = 0;
-				placeIdent(UtilLex.numIdCourant,PROC,NEUTRE,po.getIpo()+1);
-				placeIdent(-1,PRIVEE,NEUTRE,0);
+				nom = UtilLex.chaineIdent(UtilLex.numIdCourant);
+				if(desc.presentDef(nom) == 0) {
+					placeIdent(UtilLex.numIdCourant,PROC,NEUTRE,po.getIpo()+1);
+					placeIdent(-1,PRIVEE,NEUTRE,0);
+				} else {
+					placeIdent(UtilLex.numIdCourant,PROC,NEUTRE,po.getIpo()+1);
+					placeIdent(-1,DEF,NEUTRE,0);
+					desc.modifDefAdPo(desc.presentDef(nom), po.getIpo()+1);
+				}
 				bc=it+1;
 			} else {
 				UtilLex.messErr("Nom de processus " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " deja présent dans la table des symboles");
 			}
 			break;
 			
-		case 113:
+		case 112:
 			tabSymb[bc-1].info = nbParamProc;
+			desc.modifDefAdPo(desc.presentDef(nom), nbParamProc);
 			cptVarLoc = 0;
 			break;
 			
 		/* MAJ de la table des Symboles  */
-		case 118:
+		case 113:
 			/* Suppresion des variables locales */
 			it-=cptVarLoc;
 			cptVarLoc=0;
@@ -433,17 +544,27 @@ public class PtGen {
 			if(tCour == BOOL) {
 				po.produire(BSIFAUX);
 				po.produire(0);
+				
+				/* Ajout d'une ligne au vecteur de translation */
+				modifVecteurTrans(TRANSCODE);
+				
 				pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			} else {
 				UtilLex.messErr("Expression de si invalide");
 			}
 			break;
+			
 		 case 202:
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(0);
+			
+			/* Ajout d'une ligne au vecteur de translation */
+			modifVecteurTrans(TRANSCODE);
+			
 			pileRep.empiler(po.getIpo()); // on retient le trou du bincond
 			break;
+			
 		case 203:
 			po.modifier(pileRep.depiler(), po.getIpo()+1);
 			break;
@@ -453,21 +574,33 @@ public class PtGen {
 		case 211:
 			pileRep.empiler(0);
 			break;
+			
 		case 212:
 			po.produire(BSIFAUX);
 			po.produire(0);
+			
+			/* Ajout d'une ligne au vecteur de translation */
+			modifVecteurTrans(TRANSCODE);
+			
 			pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			break;
+			
 		case 213:
 			//maj bsifaux et depile la deuxieme valeur dans la pile
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(pileRep.depiler());
+			
+			/* Ajout d'une ligne au vecteur de translation */
+			modifVecteurTrans(TRANSCODE);
+			
 			pileRep.empiler(po.getIpo()); // on retient le trou du bincond
 			break;
+			
 		case 214: //Cas ou il n'y a pas de aut
 			po.modifier(pileRep.depiler(), po.getIpo()+1);
 			break;
+			
 		case 215: //Remonter la pile de reprise
 			cptCond=pileRep.depiler();
 			while(po.getElt(cptCond) != 0) {
@@ -485,10 +618,15 @@ public class PtGen {
 		case 221: //On empile la numéro de la ligne de la condition
 			pileRep.empiler(po.getIpo()+1);
 			break;
+			
 		case 222:
 			if(tCour == BOOL ) { //Si la condition est de type booléen, on produit un BSIFAUX
 				po.produire(BSIFAUX);
 				po.produire(0);
+				
+				/* Ajout d'une ligne au vecteur de translation */
+				modifVecteurTrans(TRANSCODE);
+				
 				pileRep.empiler(po.getIpo()); // on retient le trou du bsifaux
 			} else {
 				UtilLex.messErr("Expression du ttq invalide");
@@ -498,6 +636,9 @@ public class PtGen {
 			po.modifier(pileRep.depiler(), po.getIpo()+3);
 			po.produire(BINCOND);
 			po.produire(pileRep.depiler());
+			
+			/* Ajout d'une ligne au vecteur de translation */
+			modifVecteurTrans(TRANSCODE);
 			break;
 			
 		/*
@@ -516,10 +657,18 @@ public class PtGen {
 							po.produire(LIREBOOL);
 						    po.produire(AFFECTERG);
 						    po.produire(tabSymb[indexSymb].info);
+						    if(desc.getUnite().equals("module")) {
+						    	/* Ajout d'une ligne au vecteur de translation */
+								modifVecteurTrans(TRANSDON);
+						    }
 						} else {
 							po.produire(LIRENT);
 						    po.produire(AFFECTERG);
 						    po.produire(tabSymb[indexSymb].info);
+						    if(desc.getUnite().equals("module")) {
+						    	/* Ajout d'une ligne au vecteur de translation */
+								modifVecteurTrans(TRANSDON);
+						    }
 						}
 						break;
 					case VARLOCALE:
@@ -596,6 +745,10 @@ public class PtGen {
 					case VARGLOBALE:
 						po.produire(AFFECTERG);
 						po.produire(row.info);
+						if(desc.getUnite().equals("module")) {
+					    	/* Ajout d'une ligne au vecteur de translation */
+							modifVecteurTrans(TRANSDON);
+					    }
 						break;
 					case PARAMMOD:
 						po.produire(AFFECTERL);
@@ -638,6 +791,7 @@ public class PtGen {
 			
 		//Verification du nombre de param mod lors de l'appel d'une proc
 		case 255:
+			afftabSymb();
 			if(nbParamMod != (cptParamProc-nbParamFix) ) {
 				UtilLex.messErr("Nombre de parametres mod incorrect");
 			} else {
@@ -652,6 +806,9 @@ public class PtGen {
 			po.produire(APPEL);
 			po.produire(tabSymb[indexSymb].info);
 			po.produire(tabSymb[indexSymb+1].info);
+			if(tabSymb[indexSymb+1].categorie == REF) {
+				modifVecteurTrans(REFEXT);
+			}
 			break;
 			
 		/*
@@ -677,6 +834,10 @@ public class PtGen {
 						case VARGLOBALE:
 							po.produire(EMPILERADG);
 							po.produire(row.info);
+							if(desc.getUnite().equals("module")) {
+						    	/* Ajout d'une ligne au vecteur de translation */
+								modifVecteurTrans(TRANSDON);
+						    }
 							cptParamProc++;
 							break;
 						case VARLOCALE:
@@ -817,6 +978,10 @@ public class PtGen {
 					case VARGLOBALE:
 						po.produire ( CONTENUG );
 						po.produire( tabSymb[k].info  );
+						if(desc.getUnite().equals("module")) {
+					    	/* Ajout d'une ligne au vecteur de translation */
+							modifVecteurTrans(TRANSDON);
+					    }
 						break;
 					case VARLOCALE:
 						po.produire( CONTENUL );
@@ -875,19 +1040,8 @@ public class PtGen {
 			afftabSymb();
 			po.constObj();
 			po.constGen();
-			/* Fct rajouté pour vérifier si la pile est vide 
-			System.out.println(pileRep.isEmpty());
-				
-				public String isEmpty() {
-					if (ip == 0) {
-						return "Pile vide";
-					} else {
-						return "Pile non vide";
-					}		
-				}
-			*/
+			desc.ecrireDesc(UtilLex.nomSource);
 			break;
-			
 		/*
 		 * Verification du type Entier
 		 */

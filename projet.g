@@ -35,18 +35,18 @@ catch (RecognitionException e) {reportError (e) ; throw e ; }}
 
 
 unite  :   unitprog {PtGen.pt(400);} EOF
-      |    unitmodule  EOF
+      |    unitmodule {PtGen.pt(400);} EOF
   ;
   
 unitprog
-  : 'programme' ident ':'  
+  : 'programme'{PtGen.pt(11);} ident ':'  
      declarations  
-     corps {PtGen.pt(11);} { System.out.println("succes, arret de la compilation "); }
+     corps {PtGen.pt(12);} { System.out.println("succes, arret de la compilation "); }
   ;
   
 unitmodule
-  : 'module' ident ':' 
-     declarations   
+  : 'module'{PtGen.pt(21);} ident ':' 
+     declarations {PtGen.pt(23);}  
   ;
   
 declarations
@@ -54,14 +54,14 @@ declarations
   ;
   
 partiedef
-  : 'def' ident  (',' ident )* ptvg
+  : 'def' ident {PtGen.pt(41);} (',' ident {PtGen.pt(41);} )* ptvg
   ;
   
-partieref: 'ref'  specif (',' specif)* ptvg
+partieref: 'ref' specif {PtGen.pt(51);} (',' specif {PtGen.pt(51);} )* ptvg
   ;
   
-specif  : ident  ( 'fixe' '(' type  ( ',' type  )* ')' )? 
-                 ( 'mod'  '(' type  ( ',' type  )* ')' )? 
+specif  : ident {PtGen.pt(61);} ( 'fixe' '(' type {PtGen.pt(62);} ( ',' type {PtGen.pt(62);} )*  ')' )? 
+                 				( 'mod'  '(' type {PtGen.pt(63);} ( ',' type {PtGen.pt(63);} )* ')' )? 
   ;
   
 consts  : 'const' ( ident  '=' valeur {PtGen.pt(71);} ptvg  )+ 
@@ -77,7 +77,7 @@ type  : 'ent' {PtGen.pt(91);}
 decprocs: {PtGen.pt(101);} (decproc ptvg)+ {PtGen.pt(102);}
   ;
   
-decproc :  'proc' ident {PtGen.pt(112);} parfixe? parmod? {PtGen.pt(113);} consts? vars? corps {PtGen.pt(118);}
+decproc :  'proc' ident {PtGen.pt(111);} parfixe? parmod? {PtGen.pt(112);} consts? vars? corps {PtGen.pt(113);}
   ;
   
 ptvg  : ';'
