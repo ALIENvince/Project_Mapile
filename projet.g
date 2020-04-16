@@ -46,7 +46,7 @@ unitprog
   
 unitmodule
   : 'module'{PtGen.pt(21);} ident ':' 
-     declarations {PtGen.pt(23);}  
+     declarations {PtGen.pt(22);}  
   ;
   
 declarations
@@ -64,7 +64,7 @@ specif  : ident {PtGen.pt(61);} ( 'fixe' '(' type {PtGen.pt(62);} ( ',' type {Pt
                  				( 'mod'  '(' type {PtGen.pt(63);} ( ',' type {PtGen.pt(63);} )* ')' )? 
   ;
   
-consts  : 'const' ( ident  '=' valeur {PtGen.pt(71);} ptvg  )+ 
+consts  : 'const' ( ident  '=' valeur {PtGen.pt(71);} ptvg  )+
   ;
   
 vars  : 'var' ( type ident {PtGen.pt(81);}  ( ','  ident {PtGen.pt(81);} )* ptvg  )+ {PtGen.pt(82);}
