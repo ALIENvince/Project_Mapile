@@ -99,7 +99,7 @@ public class Edl {
 				trans.put(adresse, type);
 			}
 			
-			for(int k=tabDesc[i].getNbTransExt()+1; k<tabDesc[i].getTailleCode()+tabDesc[i].getNbTransExt();k++) {
+			for(int k=tabDesc[i].getNbTransExt()+1; k<tabDesc[i].getTailleCode()+tabDesc[i].getNbTransExt()+1;k++) {
 				
 				int elem = Lecture.lireInt(unit);
 				int ligne = k - (tabDesc[i].getNbTransExt());
@@ -119,13 +119,14 @@ public class Edl {
 						erreur(FATALE,"Erreur sur le type de translation");
 					}
 				}
-				po[ipo] = elem;
 				ipo++;
+				po[ipo] = elem;
 			}
 			Lecture.fermer(unit);
 		}
-		po[2] = transDon[nMod];
-		for(int i=1;i<=ipo;i++) {
+		po[2] = transDon[nMod]+tabDesc[nMod].getTailleGlobaux();
+		
+		for(int i=0;i<ipo;i++) {
 			Ecriture.ecrireStringln(f2, ""+po[i]);
 		}
 		
@@ -211,7 +212,6 @@ public class Edl {
 			System.exit(1);
 		}
 
-		printTables();
 		
 		// Phase 2 de l'edition de liens
 		// -----------------------------
