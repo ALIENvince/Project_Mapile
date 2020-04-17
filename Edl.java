@@ -59,8 +59,8 @@ public class Edl {
 		if (!tabDesc[0].getUnite().equals("programme"))
 			erreur(FATALE, "programme attendu");
 		nomProg = s;
+		/* On stocke le nom du fichier programme */
 		nomFichier[0] = s;
-		
 		nMod = 0;
 		while (!s.equals("") && nMod < MAXMOD) {
 			System.out.print("nom de module " + (nMod + 1)
@@ -71,6 +71,7 @@ public class Edl {
 				tabDesc[nMod] = new Descripteur();
 				tabDesc[nMod].lireDesc(s);
 
+				/* On stocke le nom du fichier module*/
 				nomFichier[nMod]=s;
 				
 				if (!tabDesc[nMod].getUnite().equals("module"))
@@ -89,21 +90,34 @@ public class Edl {
 		// pour construire le code concatene de toutes les unités
 		int[] po = new int[(nMod + 1) * MAXOBJ + 1];
 		
+		/* Boucle qui parcours tout les fichiers */
 		for(int i = 0;i<=nMod;i++) {
+			/* On recupere le ieme fichier et on l'ouvre pour la lecture */
 			InputStream unit = Lecture.ouvrir(nomFichier[i] + ".obj");
+			/* Création d'une HashMap et remplissage de celle avec la ligne de le type de modification*/
 			HashMap<Integer,Integer> trans = new HashMap<Integer,Integer>();
-			
 			for(int j=1;j<=tabDesc[i].getNbTransExt();j++) {
 				int adresse = Lecture.lireInt(unit);
 				int type = Lecture.lireInt(unit);
 				trans.put(adresse, type);
 			}
 			
+			/* On gere le cas ou il n'y a pas de RESERVER dans le programme mais qu'il y a des variables a reserver dans les modules */
+			if(i==0 && tabDesc[0].getTailleGlobaux()==0 && transDon[nMod] != 0) {
+				po[1]=1;
+				po[2]=0;
+				ipo=2;
+			}
+			
+			
+			/* Parcours des ligne de chaque fichier a partir de la ligne apres TransExt jusque la fin + 1*/
 			for(int k=tabDesc[i].getNbTransExt()+1; k<tabDesc[i].getTailleCode()+tabDesc[i].getNbTransExt()+1;k++) {
-				
+				/* On recupère l'element courant du .obj */
 				int elem = Lecture.lireInt(unit);
-				int ligne = k - (tabDesc[i].getNbTransExt());
 				
+				/* On verifie si la ligne est presente dans trans */
+				int ligne = k - (tabDesc[i].getNbTransExt());
+				/* Si oui, on effectue la modification correpondante */
 				if(trans.containsKey(ligne)) {
 					switch(trans.get(ligne)) {
 					case TRANSDON: 
@@ -119,13 +133,15 @@ public class Edl {
 						erreur(FATALE,"Erreur sur le type de translation");
 					}
 				}
+				/* On augmente ipo et on affecte a cet indice notre element du .obj */
 				ipo++;
 				po[ipo] = elem;
 			}
 			Lecture.fermer(unit);
 		}
+		/* On définit le nombre de variable globales totales */
 		po[2] = transDon[nMod]+tabDesc[nMod].getTailleGlobaux();
-		
+		/* On écrit dans notre .map */
 		for(int i=0;i<ipo;i++) {
 			Ecriture.ecrireStringln(f2, ""+po[i]);
 		}
@@ -136,6 +152,9 @@ public class Edl {
 		Mnemo.creerFichier(ipo, po, nomProg + ".ima");
 	}
 
+	/*
+	 * Fonction rajoutée pour vérifier le bon remplissage des différentes tables
+	 */
 	private static void printTables() {
 		String don = "TransDon :";
 		String code = "TransCode :";
@@ -171,7 +190,7 @@ public class Edl {
 		// -----------------------------
 		lireDescripteurs();
 
-		// Construction de transDon et transCode
+		/* Construction de transDon et transCode */
 		transDon[0] = 0;
 		transCode[0] = 0;
 		for(int i = 1; i<nMod+1;i++) {
@@ -179,7 +198,7 @@ public class Edl {
 			transCode[i] = transCode[i-1] + tabDesc[i-1].getTailleCode();
 		}
 		
-		// Construction DicoDef
+		/* Construction DicoDef */
 		for(int i=0;i<=nMod;i++) {
 			for(int j=1;j<=tabDesc[i].getNbDef();j++) {
 				String defNomProc = tabDesc[i].getDefNomProc(j);
@@ -191,7 +210,7 @@ public class Edl {
 			}
 		}
 		
-		// Construction adFinale
+		/* Construction adFinale */
 		for(int i=0;i<=nMod;i++) {
 			for(int j=1;j<=tabDesc[i].getNbRef();j++) {
 				String refNomProc = tabDesc[i].getRefNomProc(j);
@@ -220,6 +239,9 @@ public class Edl {
 	}
 }
 
+/*
+ * Classe privé permettant de créer une paire pour le dicoDef
+ */
 class Pair {
 	int adPo;
 	int nbParam;

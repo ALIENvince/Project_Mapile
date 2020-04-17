@@ -34,14 +34,14 @@ import java.io.FileInputStream;
 catch (RecognitionException e) {reportError (e) ; throw e ; }}
 
 
-unite  :   unitprog {PtGen.pt(400);} EOF
-      |    unitmodule {PtGen.pt(400);} EOF
+unite  :   unitprog {PtGen.pt(400);} { System.out.println("succes, arret de la compilation "); } EOF
+      |    unitmodule {PtGen.pt(400);} { System.out.println("succes, arret de la compilation "); } EOF
   ;
   
 unitprog
   : 'programme'{PtGen.pt(11);} ident ':'  
      declarations  
-     corps {PtGen.pt(12);} { System.out.println("succes, arret de la compilation "); }
+     corps {PtGen.pt(12);}
   ;
   
 unitmodule

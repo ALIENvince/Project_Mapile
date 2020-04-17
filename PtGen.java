@@ -332,7 +332,7 @@ public class PtGen {
 			if(desc.presentDef(nom) == 0) {
 				desc.ajoutDef(nom);
 			} else {
-				UtilLex.messErr(nom + " déja présent dans la table des procédures définies en DEF");
+				UtilLex.messErr("'"+ nom + "' déja présent dans la table des procédures définies en DEF");
 			}
 			break;
 			
@@ -349,7 +349,7 @@ public class PtGen {
 		 * Déclarations des procédures REF
 		 */
 		case 61:
-			indexSymb = presentIdent(UtilLex.numIdCourant);
+			indexSymb = presentIdent(1);
 			if(indexSymb < 1) {
 				nbParamProc = 0;
 				/* Ajout de la procedure dans tabRef et TabSymb*/
@@ -359,7 +359,7 @@ public class PtGen {
 				/*On utilise bc pour sauvegarder le numéro de ligne à modifier*/
 				bc = it;
 			} else {
-				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + " est déja présent dans la table des références");
+				UtilLex.messErr("'"+ UtilLex.chaineIdent(UtilLex.numIdCourant) + "' est déja présent dans la table des références");
 			}
 			break;
 		
@@ -385,7 +385,7 @@ public class PtGen {
 			    placeIdent(UtilLex.numIdCourant, CONSTANTE, tCour, vCour);
 			}
 			else {
-				UtilLex.messErr("La constante ' " + UtilLex.chaineIdent(UtilLex.numIdCourant) +" ' est deja declaree" );
+				UtilLex.messErr("La constante '" + UtilLex.chaineIdent(UtilLex.numIdCourant) +"' est deja declaree" );
 			}
 			break;
 		
@@ -403,7 +403,7 @@ public class PtGen {
 			    }
 			}
 			else {
-			    UtilLex.messErr("La variable ' " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' est deja declaree" );
+			    UtilLex.messErr("La variable '" + UtilLex.chaineIdent(UtilLex.numIdCourant) + "' est deja declaree" );
 			}
 			break;
 		case 82:
@@ -416,9 +416,14 @@ public class PtGen {
 				} else {
 					po.produire(RESERVER);
 					po.produire(cptVarGlo);
+					desc.setTailleGlobaux(cptVarGlo);
+				}
+			} else {
+				/* On ne reserve pas dans un module, on met a jour seulement le nombre des variables globales dans le programme principal*/
+				if(bc == 1) {
+					desc.setTailleGlobaux(cptVarGlo);
 				}
 			}
-			desc.setTailleGlobaux(cptVarGlo);
 			break;
 			
 		/*
@@ -446,7 +451,7 @@ public class PtGen {
 			
 		case 102:
 			if(desc.getUnite().equals("programme")) {
-				/* On modifie le bincond pour définir la ligne de retour après la déclaration */
+				/* On modifie le bincond pour définir la ligne de retour après la déclaration des proc */
 				po.modifier(pileRep.depiler(),po.getIpo()+1);
 			}
 			break;
@@ -471,20 +476,21 @@ public class PtGen {
 				}
 				bc=it+1;
 			} else {
-				UtilLex.messErr("Nom de processus " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " deja présent dans la table des symboles");
+				UtilLex.messErr("Nom de procédure '" + UtilLex.chaineIdent(UtilLex.numIdCourant) + "' deja présent dans la table des symboles");
 			}
 			break;
 			
 		case 112:
-			/*On met a jour le nombre de parametres de la procédure dans tabSymb et tabDef si elle est présente*/
+			/*On met a jour le nombre de parametres de la procédure dans tabSymb et tabDef si elle est présente dans celle ci*/
 			tabSymb[bc-1].info = nbParamProc;
 			if(desc.presentDef(nom) != 0) {
 				desc.modifDefNbParam(desc.presentDef(nom), nbParamProc);
 			}
+			/* On remet le compteur de Variables Locales à 0, pour compte seulement les constantes et variables */
 			cptVarLoc = 0;
 			break;
 			
-		/* MAJ de la table des Symboles  */
+		/* MAJ de la table des Symboles */
 		case 113:
 			/* Suppresion des variables locales */
 			it-=cptVarLoc;
@@ -501,30 +507,32 @@ public class PtGen {
 			break;
 			
 		/*
-		 * pf
+		 * Paramfixe
 		 */
 			
 		case 151:
+			/* On verifie que l'ident ne soit pas présent dans le bloc courant dans tabSymb, dans ce cas, on le rajoute dans tabSymb comme paramfixe */
 			indexSymb = presentIdent(bc);
 			if(indexSymb < 1) {
 				placeIdent(UtilLex.numIdCourant,PARAMFIXE,tCour,nbParamProc);
 				nbParamProc++;
 			} else {
-				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + "est deja dans la table des symboles");
+				UtilLex.messErr("'" +UtilLex.chaineIdent(UtilLex.numIdCourant) + "' est deja dans la table des symboles");
 			}
 			break;
 			
 		/*
-		 * pm
+		 * Parammod
 		 */
 			
 		case 171:
+			/* On verifie que l'ident ne soit pas présent dans le bloc courant dans tabSymb, dans ce cas, on le rajoute dans tabSymb comme parammod */
 			indexSymb = presentIdent(bc);
 			if(indexSymb < 1) {
 				placeIdent(UtilLex.numIdCourant,PARAMMOD,tCour,nbParamProc);
 				nbParamProc++;
 			} else {
-				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + "est deja dans la table des symboles");
+				UtilLex.messErr("'" + UtilLex.chaineIdent(UtilLex.numIdCourant) + "' est deja dans la table des symboles");
 			}
 			break;
 			
@@ -541,7 +549,7 @@ public class PtGen {
 				/* On retient le trou du BSIFAUX */
 				pileRep.empiler(po.getIpo());
 			} else {
-				UtilLex.messErr("Expression de si invalide");
+				UtilLex.messErr("Expression de si invalide"); /*TODO*/
 			}
 			break;
 			
@@ -563,6 +571,7 @@ public class PtGen {
 		/*
 		 * Boucle cond
 		 */
+			
 		case 211:
 			pileRep.empiler(0);
 			break;
@@ -622,7 +631,7 @@ public class PtGen {
 				/* On retient le trou du BSIFAUX */
 				pileRep.empiler(po.getIpo());
 			} else {
-				UtilLex.messErr("Expression du ttq invalide");
+				UtilLex.messErr("Expression du ttq invalide"); /* TODO */
 			}
 			break;
 			
@@ -678,11 +687,11 @@ public class PtGen {
 					    po.produire(1);
 						break;
 					default:
-						UtilLex.messErr("Le type de ' "+ UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' ne permet pas l'écriture");
+						UtilLex.messErr("Le type de '"+ UtilLex.chaineIdent(UtilLex.numIdCourant) + "' ne permet pas la lecture");
 						break;
 				}
 			} else {
-				UtilLex.messErr( "' " +UtilLex.chaineIdent(UtilLex.numIdCourant) + " ' n'est pas dans la table des symboles");
+				UtilLex.messErr( "'" +UtilLex.chaineIdent(UtilLex.numIdCourant) + "' n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -693,7 +702,7 @@ public class PtGen {
 			} else if (tCour==ENT) {
 				po.produire(ECRENT);
 			} else {
-				UtilLex.messErr("Type d'expression non connu");
+				UtilLex.messErr("Type d'expression non connu pour l'écriture");
 			}
 			break;
 			
@@ -709,11 +718,11 @@ public class PtGen {
 				int type = row.type;
 				if(type == BOOL) {
 				    typeIdent=BOOL;
-				} else {
+				} else if(type == ENT) {
 				    typeIdent=ENT;
 				}
 			} else {
-				UtilLex.messErr(UtilLex.chaineIdent(UtilLex.numIdCourant) + " n'est pas dans la table des symboles");
+				UtilLex.messErr("'" +UtilLex.chaineIdent(UtilLex.numIdCourant) + "' n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -739,36 +748,37 @@ public class PtGen {
 						po.produire(0);
 						break;
 					default :
-						UtilLex.messErr("Type de " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " non compatible avec l'affectation");
+						UtilLex.messErr("Catégorie de " + UtilLex.chaineIdent(UtilLex.numIdCourant) + " non compatible avec l'affectation");
 						break;
 				}
 			} else {
-				UtilLex.messErr("Le type de l'ident et de l'expression sont incompatibles");
+				UtilLex.messErr("Le type de l'ident et de l'expression sont incompatibles lors de l'affectation");
 			}
 			break;
 			
-		//Récupération du nombres de paramfixe et paramod
 		case 253:
 			int i = indexSymb+2;
+			/* Récupération du nombres de paramfixe */
 			while(tabSymb[i].categorie == PARAMFIXE) {
 				nbParamFix++;
 				i++;
 			}
+			/* Récupération du nombres de parammod */
 			while(tabSymb[i].categorie == PARAMMOD) {
 				nbParamMod++;
 				i++;
 			}
 			break;
 		
-		//Verification du nombre de param fix lors de l'appel d'une proc
 		case 254:
+			/* Verification du nombre de param fix lors de l'appel d'une proc */
 			if(nbParamFix != cptParamProc) {
 				UtilLex.messErr("Nombre de parametres fixe incorrect");
 			}
 			break;
 			
-		//Verification du nombre de param mod lors de l'appel d'une proc
 		case 255:
+			/* Verification du nombre de param mod lors de l'appel d'une proc */
 			if(nbParamMod != (cptParamProc-nbParamFix) ) {
 				UtilLex.messErr("Nombre de parametres mod incorrect");
 			} else {
@@ -778,10 +788,11 @@ public class PtGen {
 			}
 			break;
 			
-		//Appel
 		case 256:
+			/* Appel */
 			po.produire(APPEL);
 			po.produire(tabSymb[indexSymb].info);
+			/* On le rajoute au vecteurTrans seulement si c'est un appel a une ref */
 			if(tabSymb[indexSymb+1].categorie == REF) {
 				/* Ajout d'une ligne au vecteur de translation */
 				modifVecteurTrans(REFEXT);
@@ -804,9 +815,9 @@ public class PtGen {
 		 * Appel des parametres Mod
 		 */
 		case 271:
-			indexIdent = presentIdent(UtilLex.numIdCourant);
-			if(tabSymb[indexSymb+2+cptParamProc].type == tabSymb[indexIdent].type) {
-				if(indexIdent != 0) {
+			indexIdent = presentIdent(1);
+			if(indexIdent != 0) {
+				if(tabSymb[indexSymb+2+cptParamProc].type == tabSymb[indexIdent].type) {
 					EltTabSymb row = tabSymb[indexIdent];
 					switch(row.categorie) {
 						case VARGLOBALE:
@@ -829,14 +840,14 @@ public class PtGen {
 							cptParamProc++;
 							break;
 						default:
-							UtilLex.messErr("Type non compatible en parametre mod");
+							UtilLex.messErr("Le type de '" + UtilLex.chaineIdent(UtilLex.numIdCourant) +"' n'est compatible en parametre mod");
 							break;
 					}
 				} else {
-					UtilLex.messErr("Ident non présent dans la table");
+					UtilLex.messErr("Le type de '" + UtilLex.chaineIdent(UtilLex.numIdCourant) +"' n'est compatible avec le type de l'expression");
 				}
 			} else {
-				UtilLex.messErr("Type de l'expression différent du type du parametre");
+				UtilLex.messErr("'" +UtilLex.chaineIdent(UtilLex.numIdCourant) + "' n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -978,12 +989,12 @@ public class PtGen {
 						po.produire(tabSymb[k].info);
 						po.produire(1);
 						break;
-					default : UtilLex.messErr("Type non reconnu");
+					default : UtilLex.messErr("Catégorie de " + UtilLex.chaineIdent(UtilLex.numIdCourant) + "' non reconnu");
 							  break;
 				}
 				tCour = tabSymb[k].type;
 			} else {
-				UtilLex.messErr("Ident non déclarée");
+				UtilLex.messErr("'" +UtilLex.chaineIdent(UtilLex.numIdCourant) + "' n'est pas dans la table des symboles");
 			}
 			break;
 			
@@ -1016,12 +1027,12 @@ public class PtGen {
 			break;
 			
 		/*
-		 * Affichage de la table des symboles
+		 * Affichage de la table des symboles et verification que toutes les defs soit bien définit
 		 */
 		case 400:
 			for(int j = 1; j <= desc.getNbDef(); j++ ) {
                 if(desc.getDefAdPo(j) == -1) {
-                    UtilLex.messErr("La procédure " +desc.getDefNomProc(j) + " est déclarée au début du programme mais n'est pas été définie.");
+                    UtilLex.messErr("La procédure '" +desc.getDefNomProc(j) + "' est déclarée au début du programme mais n'est pas été définie.");
                 }
             }
 			afftabSymb();
